@@ -51,12 +51,4 @@ server.on('request', (req, res) => {
   }
 });
 
-// const giveFile = (filepath) => {
-//   fs.readFile(filepath, (err, data) => {
-//     if (err) {
-//       throw err;
-//     }
-//   })
-// }
-
 module.exports = server;
