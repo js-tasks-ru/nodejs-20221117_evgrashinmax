@@ -3,30 +3,31 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 
+
 const server = new http.Server();
 
 const handlingGet = (pathname, res) => {
-  if (pathname.split('/').length > 1) {
-    res.statusCode = 400;
-    res.end('Not support nested path');
-    return;
-  }
 
-  const stream = fs.createReadStream(pathname);
-  stream.pipe(res);
 
-  stream.on('error', (err) => {
-    if (err.code === 'ENOENT') {
+  fs.access(pathname, fs.constants.W_OK, (err) => {
+    if (err) {
       res.statusCode = 404;
       res.end('Not found file');
-    } else {
+      return;
+    }
+
+    const stream = fs.createReadStream(pathname);
+    stream.pipe(res);
+
+    stream.on('error', (err) => {
       res.statusCode = 500;
       res.end('unknow error');
-    }
-  });
+    });
 
-  stream.on('open', () => {});
-  stream.on('close', () => {});
+    stream.on('aborted', (err) => {
+      stream.destroy();
+    });
+  });
 }
 
 server.on('request', (req, res) => {
